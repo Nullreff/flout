@@ -65,12 +65,16 @@ void command_error(const char* message)
 %token COMPARE_NOT_EQUAL "!="
 %token OPEN_BRACE "{"
 %token CLOSE_BRACE "}"
+%token PIPE "|"
 
 /* Data */
 %token <integer> INTEGER "integer"
 %token <string> STRING "string"
 %token <string> TOKEN "token"
 %type <value> value "value"
+%type <value> expression "expression"
+%type <value> block "block"
+%type <value> statement "statement"
 
 %start input
 
@@ -80,16 +84,25 @@ input: /* empty */
 ;
 
 line: LINE_BREAK
-    | expression LINE_BREAK
+    | statement LINE_BREAK         { value_print($1); }
     | COMMENT LINE_BREAK
-    | expression COMMENT LINE_BREAK
+    | statement COMMENT LINE_BREAK { value_print($1); }
+;
+
+statement: expression            { $$ = $1; }
+         | statement PIPE block  { $$ = $1.type != TYPE_EMPTY ? $3 : value_empty(); }
+;
+
+block: OPEN_BRACE statement CLOSE_BRACE  { $$ = $2; }
+;
+
+expression: value                         { $$ = $1; }
+          | value COMPARE_EQUAL value     { $$ = value_equals($1, $3) ? value_scope() : value_empty(); }
+          | value COMPARE_NOT_EQUAL value { $$ = value_equals($1, $3) ? value_empty() : value_scope(); }
 ;
 
 value: INTEGER  { $$ = value_integer($1); }
      | STRING   { $$ = value_string($1); }
-;
-
-expression: value { print_value($1); }
 ;
 %%
 

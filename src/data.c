@@ -31,6 +31,16 @@
 #include "data.h"
 #include "repl.h"
 
+Value value_empty(void)
+{
+    return (Value){TYPE_EMPTY, {}};
+}
+
+Value value_scope(void)
+{
+    return (Value){TYPE_SCOPE, {}};
+}
+
 Value value_integer(int value)
 {
     return (Value){TYPE_INTEGER, {.integer = value}};
@@ -41,16 +51,42 @@ Value value_string(char* value)
     return (Value){TYPE_STRING, {.string = value}};
 }
 
-void print_value(Value value)
+void value_print(Value value)
 {
     switch (value.type)
     {
+        case TYPE_EMPTY:
+            repl_print("()\n");
+            break;
+
+        case TYPE_SCOPE:
+            repl_print("(@)\n");
+            break;
+
         case TYPE_INTEGER:
-            repl_print("%d\n", value.data.integer);
+            repl_print("(%d)\n", value.data.integer);
             break;
 
         case TYPE_STRING:
-            repl_print("%s\n", value.data.string);
+            repl_print("(%s)\n", value.data.string);
             break;
+
+        default: ERROR("Unknown type\n");
     }
 }
+
+bool value_equals(Value a, Value b)
+{
+    if (a.type != b.type)
+        return false;
+
+    switch (a.type)
+    {
+        case TYPE_EMPTY:   return true;
+        case TYPE_SCOPE:   return true;
+        case TYPE_INTEGER: return a.data.integer == b.data.integer;
+        case TYPE_STRING:  return strcmp(a.data.string, b.data.string);
+        default: ERROR("Unknown type\n");
+    }
+}
+

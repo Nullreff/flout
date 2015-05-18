@@ -31,7 +31,11 @@
 #ifndef FLOUT_DATA_H
 #define FLOUT_DATA_H
 
+#include "flout.h"
+
 typedef enum {
+    TYPE_EMPTY,
+    TYPE_SCOPE,
     TYPE_INTEGER,
     TYPE_STRING
 } Type;
@@ -44,8 +48,11 @@ typedef struct {
     } data;
 } Value;
 
+Value value_empty(void);
+Value value_scope(void);
 Value value_integer(int value);
 Value value_string(char* value);
-void print_value(Value value);
+void value_print(Value value);
+bool value_equals(Value a, Value b);
 
 #endif

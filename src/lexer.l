@@ -44,8 +44,9 @@
 #.*$              { return COMMENT;     }
 ==                { return COMPARE_EQUAL; }
 !=                { return COMPARE_NOT_EQUAL; }
-{                 { return OPEN_BRACE; }
-}                 { return CLOSE_BRACE; }
+\{                { return OPEN_BRACE; }
+\}                { return CLOSE_BRACE; }
+\|                { return PIPE; }
 \"(\\\"|[^"])+\"  { yylval.string  = strdup(yytext);           return STRING;  }
 -?[0-9]+          { yylval.integer = strtol(yytext, NULL, 10); return INTEGER; }
 [a-zA-Z0-9]+      { yylval.string  = strdup(yytext);           return TOKEN;   }
