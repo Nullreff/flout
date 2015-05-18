@@ -1,0 +1,9 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(flout)
+
+ADD_DEFINITIONS(-std=gnu99 -Wall -Wextra -Werror)
+
+INCLUDE_DIRECTORIES(deps/linenoise)
+ADD_SUBDIRECTORY(deps/linenoise)
+ADD_SUBDIRECTORY(src)
+
