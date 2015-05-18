@@ -44,6 +44,8 @@
 #.*$              { return COMMENT;     }
 ==                { return COMPARE_EQUAL; }
 !=                { return COMPARE_NOT_EQUAL; }
+&&                { return AND; }
+\|\|              { return OR; }
 \{                { return OPEN_BRACE; }
 \}                { return CLOSE_BRACE; }
 \|                { return PIPE; }
