@@ -48,23 +48,29 @@ void command_error(const char* message)
 
 %code requires {
     #include "repl.h"
+    #include "data.h"
 }
 
 %union {
     int integer;
-    char *string;
+    char* string;
+    char* token;
+    Value value;
 }
 
 /* Symbols */
 %token LINE_BREAK "line break"
 %token COMMENT "comment"
-%token COMMA "comma"
-%token ELLIPSIS ".."
-%token MODULUS "%"
+%token COMPARE_EQUAL "=="
+%token COMPARE_NOT_EQUAL "!="
+%token OPEN_BRACE "{"
+%token CLOSE_BRACE "}"
 
 /* Data */
-%token <integer> INT "integer"
+%token <integer> INTEGER "integer"
 %token <string> STRING "string"
+%token <string> TOKEN "token"
+%type <value> value "value"
 
 %start input
 
@@ -74,9 +80,16 @@ input: /* empty */
 ;
 
 line: LINE_BREAK
-    | STRING LINE_BREAK
+    | expression LINE_BREAK
     | COMMENT LINE_BREAK
-    | STRING COMMENT LINE_BREAK
+    | expression COMMENT LINE_BREAK
+;
+
+value: INTEGER  { $$ = value_integer($1); }
+     | STRING   { $$ = value_string($1); }
+;
+
+expression: value { print_value($1); }
 ;
 %%
 

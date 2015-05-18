@@ -1,4 +1,4 @@
-/* lexer.l - Command line instruction lexer
+/* data.h - Data structures
  *
  * Copyright (C) 2014 Ryan Mendivil <ryan@nullreff.net>
  * All rights reserved.
@@ -28,26 +28,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-%{
-#include <stdio.h>
-#include "parser.h"
+#include "data.h"
 #include "repl.h"
-#define YY_INPUT(buff, res, buffsize) (res = read_input(buff, buffsize))
-#define read_input(buff,buffsize) repl_read(buff,buffsize)
-%}
-%option noyywrap
-%option nounput
-%option noinput
-%%
-[ \t\0]           ;
-\n                { return LINE_BREAK;  }
-#.*$              { return COMMENT;     }
-==                { return COMPARE_EQUAL; }
-!=                { return COMPARE_NOT_EQUAL; }
-{                 { return OPEN_BRACE; }
-}                 { return CLOSE_BRACE; }
-\"(\\\"|[^"])+\"  { yylval.string  = strdup(yytext);           return STRING;  }
--?[0-9]+          { yylval.integer = strtol(yytext, NULL, 10); return INTEGER; }
-[a-zA-Z0-9]+      { yylval.string  = strdup(yytext);           return TOKEN;   }
-%%
 
+Value value_integer(int value)
+{
+    return (Value){TYPE_INTEGER, {.integer = value}};
+}
+
+Value value_string(char* value)
+{
+    return (Value){TYPE_STRING, {.string = value}};
+}
+
+void print_value(Value value)
+{
+    switch (value.type)
+    {
+        case TYPE_INTEGER:
+            repl_print("%d\n", value.data.integer);
+            break;
+
+        case TYPE_STRING:
+            repl_print("%s\n", value.data.string);
+            break;
+    }
+}

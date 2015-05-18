@@ -1,4 +1,4 @@
-/* lexer.l - Command line instruction lexer
+/* data.h - Data structures
  *
  * Copyright (C) 2014 Ryan Mendivil <ryan@nullreff.net>
  * All rights reserved.
@@ -28,26 +28,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-%{
-#include <stdio.h>
-#include "parser.h"
-#include "repl.h"
-#define YY_INPUT(buff, res, buffsize) (res = read_input(buff, buffsize))
-#define read_input(buff,buffsize) repl_read(buff,buffsize)
-%}
-%option noyywrap
-%option nounput
-%option noinput
-%%
-[ \t\0]           ;
-\n                { return LINE_BREAK;  }
-#.*$              { return COMMENT;     }
-==                { return COMPARE_EQUAL; }
-!=                { return COMPARE_NOT_EQUAL; }
-{                 { return OPEN_BRACE; }
-}                 { return CLOSE_BRACE; }
-\"(\\\"|[^"])+\"  { yylval.string  = strdup(yytext);           return STRING;  }
--?[0-9]+          { yylval.integer = strtol(yytext, NULL, 10); return INTEGER; }
-[a-zA-Z0-9]+      { yylval.string  = strdup(yytext);           return TOKEN;   }
-%%
+#ifndef FLOUT_DATA_H
+#define FLOUT_DATA_H
 
+typedef enum {
+    TYPE_INTEGER,
+    TYPE_STRING
+} Type;
+
+typedef struct {
+    Type type;
+    union {
+        int integer;
+        char* string;
+    } data;
+} Value;
+
+Value value_integer(int value);
+Value value_string(char* value);
+void print_value(Value value);
+
+#endif
