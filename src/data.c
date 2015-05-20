@@ -33,46 +33,81 @@
 
 Value value_empty(void)
 {
-    return (Value){TYPE_EMPTY, {}};
+    return (Value){TYPE_EMPTY, 0, {0}};
 }
 
 Value value_scope(void)
 {
-    return (Value){TYPE_SCOPE, {}};
+    return (Value){TYPE_SCOPE, 0, {0}};
 }
 
 Value value_integer(int value)
 {
-    return (Value){TYPE_INTEGER, {.integer = value}};
+    return (Value){TYPE_INTEGER, 1, {.integer = value}};
 }
 
 Value value_string(char* value)
 {
-    return (Value){TYPE_STRING, {.string = value}};
+    return (Value){TYPE_STRING, 1, {.string = value}};
 }
 
-void value_print(Value value)
+Value value_list(ValueList* list)
+{
+    if (list == NULL)
+        return value_empty();
+
+    unsigned int count = list->count;
+    Value* data = malloc(sizeof(Value) * count);
+    CHECK_OOM(data);
+    for (unsigned int i = 0; list != NULL; list = list->next)
+        data[i++] = list->value;
+    return (Value){TYPE_LIST, count, {.list = data}};
+}
+
+static void value_print_helper(Value value)
 {
     switch (value.type)
     {
         case TYPE_EMPTY:
-            repl_print("()\n");
+            repl_print("()");
             break;
 
         case TYPE_SCOPE:
-            repl_print("(@)\n");
+            repl_print("(@)");
             break;
 
         case TYPE_INTEGER:
-            repl_print("(%d)\n", value.data.integer);
+            repl_print("%d", value.data.integer);
             break;
 
         case TYPE_STRING:
-            repl_print("(%s)\n", value.data.string);
+            repl_print("%s", value.data.string);
             break;
 
-        default: ERROR("Unknown type\n");
+        case TYPE_LIST:
+            if (value.count == 0)
+                repl_print("()");
+            else
+            {
+                repl_print("( ");
+                for (unsigned int i = 0; i < value.count; i++)
+                {
+                    value_print_helper(value.data.list[i]);
+                    repl_print(" ");
+                }
+                repl_print(")");
+            }
+            break;
+
+        default:
+            ERROR("Unknown type\n");
     }
+}
+
+void value_print(Value value)
+{
+    value_print_helper(value);
+    repl_print("\n");
 }
 
 bool value_equals(Value a, Value b)
@@ -82,11 +117,35 @@ bool value_equals(Value a, Value b)
 
     switch (a.type)
     {
-        case TYPE_EMPTY:   return true;
-        case TYPE_SCOPE:   return true;
-        case TYPE_INTEGER: return a.data.integer == b.data.integer;
-        case TYPE_STRING:  return strcmp(a.data.string, b.data.string);
+        case TYPE_EMPTY:
+           return true;
+
+        case TYPE_SCOPE:
+           return true;
+
+        case TYPE_INTEGER:
+            return a.data.integer == b.data.integer;
+
+        case TYPE_STRING:
+            return strcmp(a.data.string, b.data.string) == 0;
+
+        case TYPE_LIST:
+            for (unsigned int i = 0; i < a.count; i++)
+                if (!value_equals(a.data.list[i], b.data.list[i]))
+                    return false;
+            return true;
+
         default: ERROR("Unknown type\n");
     }
+}
+
+ValueList* valuelist_init(Value value, ValueList* next)
+{
+    ValueList* list = malloc(sizeof(ValueList));
+    CHECK_OOM(list);
+    list->next = next;
+    list->value = value;
+    list->count = next != NULL ? next->count + 1 : 1;
+    return list;
 }
 

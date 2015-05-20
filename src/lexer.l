@@ -48,6 +48,8 @@
 \|\|              { return OR; }
 \{                { return OPEN_BRACE; }
 \}                { return CLOSE_BRACE; }
+\(                { return OPEN_PAREN; }
+\)                { return CLOSE_PAREN; }
 \|                { return PIPE; }
 \"(\\\"|[^"])+\"  { yylval.string  = strdup(yytext);           return STRING;  }
 -?[0-9]+          { yylval.integer = strtol(yytext, NULL, 10); return INTEGER; }

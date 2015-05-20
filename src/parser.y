@@ -56,6 +56,7 @@ void command_error(const char* message)
     char* string;
     char* token;
     Value value;
+    ValueList* list;
 }
 
 /* Symbols */
@@ -67,6 +68,8 @@ void command_error(const char* message)
 %token OR "||"
 %token OPEN_BRACE "{"
 %token CLOSE_BRACE "}"
+%token OPEN_PAREN "("
+%token CLOSE_PAREN ")"
 %token PIPE "|"
 
 /* Data */
@@ -77,6 +80,8 @@ void command_error(const char* message)
 %type <value> expression "expression"
 %type <value> block "block"
 %type <value> statement "statement"
+%type <list> list "list"
+%type <list> list_elems "list_elems"
 
 %start input
 
@@ -107,6 +112,14 @@ expression: value                         { $$ = $1; }
 
 value: INTEGER  { $$ = value_integer($1); }
      | STRING   { $$ = value_string($1); }
+     | list     { $$ = value_list($1); }
+;
+
+list: OPEN_PAREN list_elems CLOSE_PAREN { $$ = $2; }
+;
+
+list_elems: /* empty */        { $$ = NULL; }
+          | value list_elems   { $$ = valuelist_init($1, $2); }
 ;
 %%
 

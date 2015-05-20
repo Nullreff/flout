@@ -37,22 +37,33 @@ typedef enum {
     TYPE_EMPTY,
     TYPE_SCOPE,
     TYPE_INTEGER,
-    TYPE_STRING
+    TYPE_STRING,
+    TYPE_LIST
 } Type;
 
-typedef struct {
+typedef struct Value {
     Type type;
+    unsigned int count;
     union {
         int integer;
         char* string;
+        struct Value* list;
     } data;
 } Value;
+
+typedef struct ValueList {
+    struct ValueList* next;
+    unsigned int count;
+    Value value;
+} ValueList;
 
 Value value_empty(void);
 Value value_scope(void);
 Value value_integer(int value);
 Value value_string(char* value);
+Value value_list(ValueList* list);
 void value_print(Value value);
 bool value_equals(Value a, Value b);
+ValueList* valuelist_init(Value value, ValueList* next);
 
 #endif
